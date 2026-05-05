@@ -1,0 +1,68 @@
+fund:
+  name: "Meridian Capital Partners"
+  analyst: "JARVIS"
+
+universe:
+  benchmark_tickers: ["SPY", "QQQ", "IWM", "DIA", "XLK", "XLF", "XLE", "XLI", "XLV", "XLC", "XLY", "XLP", "XLB", "XLRE", "XLU"]
+
+dev_mode: true          # true = 10-ticker universe for fast validation
+dev_tickers: ["AAPL", "MSFT", "GOOGL", "AMZN", "NVDA", "JPM", "JNJ", "UNH", "XOM", "V"]
+
+portfolio:
+  num_longs: 20
+  num_shorts: 20
+  max_position_pct: 0.05
+  max_sector_pct: 0.25
+  gross_limit: 1.50
+  net_limit: 0.10
+  max_beta: 0.15
+  turnover_budget: 0.30
+  mvo_risk_aversion: 1.0
+  optimize_method: "mvo"   # mvo | conviction
+
+risk:
+  daily_loss_limit: 0.015
+  daily_halt_limit: 0.025
+  weekly_loss_limit: 0.04
+  drawdown_limit: 0.08
+  single_position_nav_limit: 0.03
+  correlation_alert: 0.60
+  correlation_veto: 0.80
+  factor_zscore_alert: 1.5
+  vix_reduce_threshold: 25
+  vix_halt_threshold: 33
+
+scoring:
+  regime_conditional_weights: false
+  weights:
+    momentum: 0.20
+    quality: 0.20
+    value: 0.15
+    revisions: 0.15
+    insider: 0.10
+    growth: 0.10
+    short_interest: 0.05
+    institutional: 0.05
+
+ai:
+  provider: "openrouter"
+  model: "google/gemini-2.0-flash-exp:free"
+  base_url: "https://openrouter.ai/api/v1"
+  cost_ceiling_usd: 25.0
+  cache_ttl_days: 30
+
+execution:
+  mode: "paper"           # paper | live (live requires explicit confirmation)
+  alpaca_base_url: "https://paper-api.alpaca.markets"
+  slippage_spread_bps: 5
+  market_impact_coeff: 0.10
+  max_order_pct_adv: 0.02
+  time_in_force: "gtc"
+
+reporting:
+  weekly_commentary_day: "friday"
+  short_term_tax_rate: 0.37
+  long_term_tax_rate: 0.20
+
+dashboard:
+  port: 8502
