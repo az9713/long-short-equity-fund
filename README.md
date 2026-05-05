@@ -1,5 +1,7 @@
 # JARVIS — Long-Short Equity Fund
 
+> **Status:** Under active development. APIs, layer interfaces, and config schema may change without notice. Not investment advice.
+
 A seven-layer long-short equity research and paper-trading system. Quantitative scoring, AI-driven qualitative analysis, mean-variance portfolio construction, risk monitoring, and Alpaca paper execution — all running locally from the command line.
 
 ## Inspiration
