@@ -304,6 +304,7 @@ These surfaced during the smoke test but were left alone deliberately.
 - **Three 13F filings still log "No holdings parsed"** (Bridgewater, Third Point, Baupost). Unrelated to fix 3 — likely a different filing-shape issue (NT-13F amendment or non-standard XML).
 - **`output/scored_universe_latest.csv` is overwritten by `--ticker` runs.** Re-run full scoring before Layer 4 if you've spot-checked a single ticker. Not a bug per se — just shared state worth knowing.
 - **Off-hours order timeouts.** Real Alpaca paper orders submitted after market close cancel after the 3-attempt retry. Correct behavior; mentioned here so it isn't mistaken for a regression.
+- **Alpaca cancel-on-fill mishandled in retry loop.** Surfaced during the [test-run capture](test-run-results.md#execute-all-approved-trades-against-alpaca-paper). When an Alpaca paper limit order fills before our wait-window expires, the subsequent cancel attempt returns `{"code":42210000,"message":"order is already in \"filled\" state"}`. `execution/executor.py` treats every cancel-failure as a generic timeout and re-submits, producing duplicate orders that JARVIS's local `order_log` doesn't reconcile. Fix idea: detect the "already filled" payload and treat it as success (record the fill, exit the retry loop). Worth a follow-up patch when the next change touches the executor.
 
 ## See also
 

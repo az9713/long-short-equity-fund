@@ -37,5 +37,6 @@ A seven-layer long-short equity research and paper-trading system. Quantitative 
 | &nbsp;&nbsp;&nbsp;&nbsp;[ADRs](architecture/adr/) | Decision records |
 | [Troubleshooting](troubleshooting/common-issues.md) | Top failures and fixes |
 | [Changelog](changelog.md) | Bug fixes from the first end-to-end smoke test |
+| [Test-run results](test-run-results.md) | Captured outputs from running the natural-language test prompts on the dev universe |
 
 > **New here?** Read [what-is-this](overview/what-is-this.md), then follow the [quickstart](getting-started/quickstart.md).

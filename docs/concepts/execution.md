@@ -143,6 +143,8 @@ Run `python run_execution.py --status` to trigger a sync and print the results.
 
 **`portfolio_value` reads as $100,000 in dry-run.** Default. Without an Alpaca account, the script can't know your actual equity, so it falls back to a $100k notional. Adjust at the top of `run_execution.py` if needed.
 
+**Logs say "All 3 attempts failed" but Alpaca actually filled the order.** Known issue surfaced during the [test-run capture](../test-run-results.md#execute-all-approved-trades-against-alpaca-paper). When a limit order fills before our retry-wait window expires, the cancel attempt returns `order is already in "filled" state`; the retry loop treats that as a generic timeout and re-submits. Result: phantom duplicate orders at Alpaca that JARVIS's local `order_log` doesn't reconcile. Pending a follow-up patch — until then, after running `--execute` outside market hours, double-check Alpaca's web UI for unexpected fills before queuing the next rebalance.
+
 ## See also
 
 - [Reporting and dashboard](reporting-and-dashboard.md) — what visualizes the fills next
