@@ -25,7 +25,7 @@ Plus three orchestration modules:
 |--------|------|
 | `factors/base.py` | Sector normalization, sector-relative percentile ranking, winsorization, safe arithmetic helpers |
 | `factors/regime_weights.py` | Optional regime-conditional weighting (off by default) |
-| `factors/composite.py` | Orchestrator: calls every factor, computes composite, assigns LONG/SHORT/HOLD signal, writes CSV |
+| `factors/composite.py` | Orchestrator: calls every factor, computes composite, assigns LONG/SHORT/NEUTRAL signal, writes CSV |
 | `factors/crowding.py` | Tracks factor return correlations and IRRs; flags crowded pairs |
 
 ## How scoring works
@@ -48,7 +48,7 @@ The orchestrator `factors/composite.py` runs in three passes per ticker:
    factor scores → composite (weighted by config: scoring.weights)
                 │
                 ▼
-   composite + thresholds → signal: LONG / SHORT / HOLD
+   composite percentile → signal: LONG / SHORT / NEUTRAL
 ```
 
 The key step is **sector-relative ranking**. A high quality score doesn't mean "high quality in absolute terms" — it means "high quality compared to other stocks in the same GICS sector." Banks are ranked against banks, software against software. This avoids meaningless cross-sector comparisons (a bank's debt ratio is structurally different from a tech firm's).
@@ -76,15 +76,17 @@ Each subfactor is computed by a `compute_*_raw(ticker, sector)` function in its 
 composite = sum(factor_score[f] * weight[f] for f in FACTOR_NAMES)
 ```
 
-The default `signal` thresholds are:
+Signals are assigned by **rank**, not by absolute score:
 
-| Composite range | Signal |
-|-----------------|--------|
-| > 70 | LONG |
-| < 30 | SHORT |
-| 30–70 | HOLD |
+| Composite percentile within universe | Signal |
+|--------------------------------------|--------|
+| Top 20% | LONG |
+| Bottom 20% | SHORT |
+| Middle 60% | NEUTRAL |
 
-Tied at the breakpoints, the higher-decile rank wins. Adjust thresholds in `factors/composite.py: _assign_signal` if you want a wider or narrower signal band.
+This scales correctly with universe size — a 10-ticker dev book gets 2 LONG / 2 SHORT, a 503-ticker S&P 500 run gets ~100/100. Universes smaller than 5 tickers skip signal assignment entirely (everything stays NEUTRAL). Adjust the percentile breakpoints in `factors/composite.py` if you want a wider or narrower signal band.
+
+> **Note:** The original implementation used absolute thresholds (`composite >= 80` → LONG, `<= 20` → SHORT) which never fired on small universes. Fixed in the first end-to-end smoke test — see [changelog #5](../changelog.md#5-hard-coded-composite--80-long-threshold-despite-top-quintile-comment).
 
 ## Quality diagnostics
 
@@ -126,7 +128,7 @@ Implementation in `factors/regime_weights.py`. Off by default to keep scoring ru
 | `sector` | GICS sector (normalized) |
 | `momentum`, `value`, `quality`, `growth`, `revisions`, `short_interest`, `insider`, `institutional` | 0–100 sector-relative factor score |
 | `composite` | Weighted composite (0–100) |
-| `signal` | `LONG`, `SHORT`, `HOLD` |
+| `signal` | `LONG`, `SHORT`, `NEUTRAL` |
 | `piotroski_f` | 0–9 |
 | `altman_z` | Float |
 | `altman_label` | `SAFE`, `GREY`, `DISTRESS` |

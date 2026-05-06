@@ -177,7 +177,7 @@ Layer 3 produces qualitative analysis that supplements, but does not replace, th
 
 ### Free models by default
 
-Layer 3 uses `google/gemini-2.0-flash-exp:free` via OpenRouter. Real cost is $0. See [ADR-001](adr/001-openrouter-over-anthropic-api.md).
+Layer 3 uses `openai/gpt-oss-20b:free` via OpenRouter. Real cost is $0. See [ADR-001](adr/001-openrouter-over-anthropic-api.md).
 
 **Why:** Cost-control floor. The free tier means a runaway loop costs nothing, and a personal user can run the system indefinitely.
 

@@ -54,6 +54,8 @@ A simpler ranking-based optimizer:
 
 Faster, more stable, but ignores covariance — does not optimize for diversification benefit.
 
+**Cap-aware sizing.** When too few candidates exist to fill the gross target without breaching `max_position_pct`, the optimizer accepts a smaller book rather than silently uncapping positions. With 3 LONG candidates and a 5% cap, the long book is sized at 15% gross — not 75% with 25%-sized positions. The fallback target gross is `min(_GROSS_TARGET, max_pos × n_candidates)`. See [changelog #8](../changelog.md#8-conviction-optimizer-silently-breached-the-per-position-cap).
+
 Choose between them in `config.yaml`:
 
 ```yaml
@@ -94,6 +96,12 @@ The trade list has one row per change-in-weight ticker:
 | `trade_shares` | Difference |
 | `trade_usd` | `trade_shares * close` |
 | `estimated_cost_bps` | From `transaction_cost.estimate_cost_bps` |
+
+## Turnover budget
+
+`portfolio.turnover_budget` (default 30%) caps how much of the portfolio can churn in a single rebalance — measured as `sum(|trade_usd|) / portfolio_value`. Trades exceeding the budget are trimmed by smallest-delta-weight first.
+
+The budget is **only applied when there are existing positions to churn from.** On the first rebalance from an empty book — by definition 100% turnover — the budget is skipped (otherwise no first-time portfolio could ever be built). See [changelog #9](../changelog.md#9-turnover-budget-killed-every-initial-build-rebalance).
 
 ## Approval flow
 

@@ -12,7 +12,7 @@ Definitions for every term used elsewhere in the docs. Sorted alphabetically.
 
 **Crowding** — The state where the same long and short ideas are being held by many funds at once, raising the risk of correlated unwinds. JARVIS detects crowding by tracking factor return correlations and IRRs. See `factors/crowding.py`.
 
-**Dev mode** — A reduced 10-ticker universe (`AAPL, MSFT, GOOGL, AMZN, NVDA, JPM, JNJ, UNH, XOM, V`) used for fast end-to-end validation. Toggled via `dev_mode: true` in `config.yaml` or `--dev` flag on `run_data.py`.
+**Dev mode** — A reduced 10-ticker universe (`AAPL, MSFT, NVDA, INTC, JNJ, UNH, LLY, JPM, GS, BAC`) used for fast end-to-end validation. Three sectors with ≥3 tickers each (IT, Health Care, Financials) so sector-relative scoring produces meaningful spreads. Toggled via `dev_mode: true` in `config.yaml` or `--dev` flag on `run_data.py`.
 
 **Gross exposure** — Sum of absolute position weights. A 60% long / 40% short portfolio has 100% gross. Capped at `gross_limit` in config (default 1.50, i.e. 150%).
 
@@ -36,7 +36,7 @@ Definitions for every term used elsewhere in the docs. Sorted alphabetically.
 
 **Sector-relative ranking** — Every factor score is computed by ranking tickers within their GICS sector, not against the full universe. A high quality score means high quality *for that sector*. Avoids spurious cross-sector comparisons (e.g., banks vs. software).
 
-**Signal** — `LONG`, `SHORT`, or `HOLD` per ticker. Assigned by `factors/composite.py` based on composite-score thresholds.
+**Signal** — `LONG`, `SHORT`, or `NEUTRAL` per ticker. Assigned by `factors/composite.py` as the top/bottom 20% of composite-score percentile within the universe.
 
 **Subfactor** — A sub-metric within a factor. Example: the value factor has subfactors `pe_ratio`, `pb_ratio`, `ev_ebitda`, `fcf_yield`. Each is computed in its own factor module.
 
@@ -72,7 +72,7 @@ Definitions for every term used elsewhere in the docs. Sorted alphabetically.
 
 **Analyzer** — One of four LLM-driven modules in `analysis/`: `earnings_analyzer`, `filing_analyzer`, `risk_analyzer`, `insider_analyzer`. Each returns structured JSON for one ticker.
 
-**OpenRouter** — A unified API gateway to many LLM providers. JARVIS uses it via the `openai` Python SDK with a custom `base_url`. Default model is `google/gemini-2.0-flash-exp:free`. See [ADR-001](../architecture/adr/001-openrouter-over-anthropic-api.md).
+**OpenRouter** — A unified API gateway to many LLM providers. JARVIS uses it via the `openai` Python SDK with a custom `base_url`. Default model is `openai/gpt-oss-20b:free`. See [ADR-001](../architecture/adr/001-openrouter-over-anthropic-api.md).
 
 **Cost tracker** — `analysis/cost_tracker.py`. Records token usage per call to a JSON file so the cost ceiling in config can stop runaway runs. With the free Gemini model, real cost is $0.
 

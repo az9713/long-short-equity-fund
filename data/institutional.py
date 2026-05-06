@@ -35,7 +35,7 @@ _NOISE = re.compile(
 @sleep_and_retry
 @limits(calls=8, period=1)
 def _sec_get(url: str, **kwargs) -> requests.Response:
-    headers = {**sec_headers(), "Accept": "application/json"}
+    headers = {**sec_headers(), "Accept": "application/json", **kwargs.pop("headers", {})}
     r = requests.get(url, headers=headers, timeout=20, **kwargs)
     r.raise_for_status()
     return r
@@ -148,9 +148,15 @@ def _parse_13f_xml(xml_text: str) -> list[dict]:
     """Parse 13F information table XML and return list of holdings."""
     holdings = []
     try:
-        # Remove namespace declarations for simpler parsing
+        # Strip namespace declarations and namespaced attrs (e.g. xsi:schemaLocation)
+        # that often arrive without an accompanying xmlns:xsi declaration.
         xml_clean = re.sub(r'\s+xmlns[^"]*"[^"]*"', "", xml_text)
-        root = lxml_etree.fromstring(xml_clean.encode("utf-8", errors="replace"))
+        xml_clean = re.sub(r'\s+[A-Za-z_][\w.-]*:[A-Za-z_][\w.-]*="[^"]*"', "", xml_clean)
+        parser = lxml_etree.XMLParser(recover=True)
+        root = lxml_etree.fromstring(xml_clean.encode("utf-8", errors="replace"), parser)
+        if root is None:
+            log.warning("Failed to parse 13F XML: empty root after recovery")
+            return holdings
     except Exception as e:
         log.warning(f"Failed to parse 13F XML: {e}")
         return holdings

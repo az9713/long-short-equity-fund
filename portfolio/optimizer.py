@@ -153,13 +153,24 @@ def optimize_conviction(
             long_weights = _normalize(long_weights, g_l)
             short_weights = _normalize(short_weights, g_s)
 
-    # Apply per-position cap after all adjustments
-    long_weights = long_weights.clip(upper=max_pos)
-    short_weights = short_weights.clip(upper=max_pos)
+    # Apply per-position cap. If too few candidates exist to fill the gross
+    # target without breaching the cap, accept a smaller book rather than
+    # silently inflating positions past the cap.
+    def _cap_and_normalize(weights: pd.Series) -> pd.Series:
+        if weights.empty:
+            return weights
+        max_feasible = max_pos * len(weights)
+        target_gross = min(_GROSS_TARGET, max_feasible)
+        weights = _normalize(weights, target_gross)
+        weights = weights.clip(upper=max_pos)
+        # One more renormalize in case the cap left us under target (e.g. when
+        # earnings/liquidity adjustments already shrank some weights).
+        return _normalize(weights, target_gross)
 
-    # Final re-normalize after clipping
-    long_weights = _normalize(long_weights, _GROSS_TARGET)
-    short_weights = _normalize(short_weights, _GROSS_TARGET)
+    long_weights = _cap_and_normalize(long_weights)
+    short_weights = _cap_and_normalize(short_weights)
+    if long_weights.gt(max_pos + 1e-9).any() or short_weights.gt(max_pos + 1e-9).any():
+        log.warning("Per-position cap breached after normalization — check candidate count")
 
     result = {}
     for ticker in long_weights.index:

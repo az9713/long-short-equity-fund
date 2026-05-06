@@ -67,7 +67,7 @@ Every JARVIS order is:
 | Field | Value |
 |-------|-------|
 | Order type | `LIMIT` |
-| Time in force | `gtc` (default; configurable via `execution.time_in_force`) |
+| Time in force | `gtc` (default; configurable via `execution.time_in_force`). **Auto-overridden to `day` for fractional shares** — Alpaca rejects GTC for fractional quantities. See [changelog #12](../changelog.md#12-alpaca-rejected-every-paper-order-fractional-orders-must-be-day-orders). |
 | Limit offset | ±10 bps from last close |
 | Side | `BUY`, `SELL`, `SELL_SHORT`, `BUY_TO_COVER` (mapped from JARVIS LONG/SHORT semantics) |
 | Quantity | Computed from target weight × portfolio value / last close, rounded to 4 decimal places |

@@ -62,7 +62,7 @@ LONG candidates:  ~50
 SHORT candidates: ~50
 ```
 
-The signal counts depend on composite-score thresholds. Default thresholds give roughly 10% LONG and 10% SHORT; the rest are HOLD.
+Signal counts are determined by rank, not absolute thresholds: top 20% by composite percentile → `LONG`, bottom 20% → `SHORT`, middle 60% → `NEUTRAL`. So a 503-ticker universe gives roughly 100 LONG / 100 SHORT.
 
 ### 4. Verify factor differentiation
 

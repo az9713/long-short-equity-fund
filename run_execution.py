@@ -13,7 +13,7 @@ import sys
 import signal
 import argparse
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
 
 ROOT = Path(__file__).parent
 sys.path.insert(0, str(ROOT))
@@ -222,7 +222,7 @@ def main():
     print("=" * 60)
     print("  Meridian Capital Partners — JARVIS Execution Layer")
     print("=" * 60)
-    print(f"  {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC")
+    print(f"  {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S')} UTC")
 
     # Broker startup — sync Alpaca positions on execute/dry-run
     from execution.broker import broker

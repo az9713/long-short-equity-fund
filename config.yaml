@@ -6,7 +6,7 @@ universe:
   benchmark_tickers: ["SPY", "QQQ", "IWM", "DIA", "XLK", "XLF", "XLE", "XLI", "XLV", "XLC", "XLY", "XLP", "XLB", "XLRE", "XLU"]
 
 dev_mode: true          # true = 10-ticker universe for fast validation
-dev_tickers: ["AAPL", "MSFT", "GOOGL", "AMZN", "NVDA", "JPM", "JNJ", "UNH", "XOM", "V"]
+dev_tickers: ["AAPL", "MSFT", "NVDA", "INTC", "JNJ", "UNH", "LLY", "JPM", "GS", "BAC"]
 
 portfolio:
   num_longs: 20
@@ -46,7 +46,7 @@ scoring:
 
 ai:
   provider: "openrouter"
-  model: "google/gemini-2.0-flash-exp:free"
+  model: "openai/gpt-oss-20b:free"
   base_url: "https://openrouter.ai/api/v1"
   cost_ceiling_usd: 25.0
   cache_ttl_days: 30

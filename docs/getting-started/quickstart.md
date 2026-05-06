@@ -2,7 +2,7 @@
 
 Get JARVIS running end-to-end against a 10-ticker dev universe in about 15 minutes.
 
-This guide assumes you've already met the [prerequisites](prerequisites.md). The dev mode universe is hard-coded to ten large-cap names (`AAPL, MSFT, GOOGL, AMZN, NVDA, JPM, JNJ, UNH, XOM, V`) so you can validate every layer fast before scaling up.
+This guide assumes you've already met the [prerequisites](prerequisites.md). The dev mode universe is hard-coded to ten large-cap names (`AAPL, MSFT, NVDA, INTC, JNJ, UNH, LLY, JPM, GS, BAC`) so you can validate every layer fast before scaling up.
 
 ## 1. Install dependencies
 
@@ -51,7 +51,7 @@ Open `config.yaml` and confirm:
 
 ```yaml
 dev_mode: true
-dev_tickers: ["AAPL", "MSFT", "GOOGL", "AMZN", "NVDA", "JPM", "JNJ", "UNH", "XOM", "V"]
+dev_tickers: ["AAPL", "MSFT", "NVDA", "INTC", "JNJ", "UNH", "LLY", "JPM", "GS", "BAC"]
 ```
 
 This is the default. With `dev_mode: true`, every layer operates on these ten tickers only.
@@ -101,7 +101,7 @@ Inspect the CSV:
 head -5 output/scored_universe_latest.csv
 ```
 
-Each row has factor scores (0–100), a composite, a signal (`LONG`/`SHORT`/`HOLD`), and quality diagnostics (Piotroski F, Altman Z).
+Each row has factor scores (0–100), a composite, a signal (`LONG`/`SHORT`/`NEUTRAL`), and quality diagnostics (Piotroski F, Altman Z).
 
 ## 6. Launch the dashboard
 

@@ -22,7 +22,7 @@ The file is read on every invocation by `utils.get_config()`. Edits take effect 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
 | `dev_mode` | bool | `true` | When true, every layer operates on `dev_tickers` instead of the full S&P 500. |
-| `dev_tickers` | list[string] | `["AAPL", "MSFT", "GOOGL", "AMZN", "NVDA", "JPM", "JNJ", "UNH", "XOM", "V"]` | Ten large-cap tickers used in dev mode. Edit to test other names. |
+| `dev_tickers` | list[string] | `["AAPL", "MSFT", "NVDA", "INTC", "JNJ", "UNH", "LLY", "JPM", "GS", "BAC"]` | Ten large-cap tickers used in dev mode. Three sectors with ≥3 tickers each (IT, Health Care, Financials) so sector-relative scoring produces meaningful spreads. Edit to test other names but keep ≥3 per sector — see [changelog #4](../changelog.md#4-dev_tickers-had-one-ticker-per-most-sectors--every-score-collapsed-to-50). |
 
 ## portfolio
 
@@ -35,7 +35,7 @@ The file is read on every invocation by `utils.get_config()`. Edits take effect 
 | `gross_limit` | float | 1.50 | Max sum of absolute weights (e.g., 0.75 long + 0.75 short = 1.50) |
 | `net_limit` | float | 0.10 | Max signed sum of weights (long − short) |
 | `max_beta` | float | 0.15 | Max absolute net portfolio beta |
-| `turnover_budget` | float | 0.30 | Soft monthly turnover target. Exceeding logs a warning; does not block. |
+| `turnover_budget` | float | 0.30 | Max fraction of NAV that can churn in a single rebalance. Excess trades are trimmed by smallest-delta-weight first. **Skipped on initial build from an empty book.** See [changelog #9](../changelog.md#9-turnover-budget-killed-every-initial-build-rebalance). |
 | `mvo_risk_aversion` | float | 1.0 | λ in `−w·μ + λ·w·Σ·w`. Higher = more conservative. |
 | `optimize_method` | enum | `"mvo"` | Which optimizer to use. Values: `mvo` or `conviction`. |
 
@@ -75,7 +75,7 @@ The file is read on every invocation by `utils.get_config()`. Edits take effect 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
 | `provider` | string | `"openrouter"` | Informational. Only `model` and `base_url` matter at runtime. |
-| `model` | string | `"google/gemini-2.0-flash-exp:free"` | OpenRouter model slug. Free tier with 15 RPM. |
+| `model` | string | `"openai/gpt-oss-20b:free"` | OpenRouter model slug. Free tier with 15 RPM. Free models rotate on OpenRouter — query `https://openrouter.ai/api/v1/models` if the default 404s. See [changelog #6](../changelog.md#6-default-openrouter-model-was-deprecated-404). |
 | `base_url` | string | `"https://openrouter.ai/api/v1"` | API base URL. Set to `https://api.anthropic.com/v1` or `https://api.openai.com/v1` for direct provider access. |
 | `cost_ceiling_usd` | float | 25.0 | Soft cost ceiling. Cost tracker logs warning when exceeded; does not abort. |
 | `cache_ttl_days` | int | 30 | TTL for `analysis_cache` rows. After expiry, analyzer is re-called. |
@@ -89,7 +89,7 @@ The file is read on every invocation by `utils.get_config()`. Edits take effect 
 | `slippage_spread_bps` | int | 5 | Estimated half-spread in bps. Used by transaction-cost model and pre-trade estimate. |
 | `market_impact_coeff` | float | 0.10 | Coefficient in `impact_bps = coeff × sqrt(trade_usd / adv_usd) × 10_000`. |
 | `max_order_pct_adv` | float | 0.02 | Loose execution check (2% ADV). Pre-trade veto uses a stricter 5%. |
-| `time_in_force` | enum | `"gtc"` | Alpaca order TIF. `gtc`, `day`, `ioc`, `fok`. |
+| `time_in_force` | enum | `"gtc"` | Alpaca order TIF. `gtc`, `day`, `ioc`, `fok`. **Auto-overridden to `day` for fractional shares** (Alpaca rejects GTC for fractional quantities). See [changelog #12](../changelog.md#12-alpaca-rejected-every-paper-order-fractional-orders-must-be-day-orders). |
 
 ## reporting
 

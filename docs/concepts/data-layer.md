@@ -66,6 +66,8 @@ yfinance returns sector strings like `"Technology"` and `"Financial Services"`. 
 - yfinance occasionally drops a ticker for a refresh; `market_data.update_prices` catches the exception and continues.
 - SEC EDGAR sometimes returns malformed XBRL. The filing analyzer (Layer 3) is defensive: missing fields produce `None`, not crashes.
 - Form 4 insider data is several days lagged. JARVIS does not attempt to capture intra-day insider activity.
+- SEC's submissions API returns `primary_doc` like `xslF345X06/form4.xml` for Form 4 — that path serves the stylesheet-rendered HTML view, not raw XML. JARVIS strips the directory prefix to fetch the raw XML at the filing root, with `index.json` enumeration as a fallback. See [changelog #2](../changelog.md#2-form-4-primary_doc-returned-the-stylesheet-not-the-xml).
+- 13F XML often includes `xsi:schemaLocation` without an `xmlns:xsi` declaration. JARVIS's parser strips namespaced attributes and uses `lxml` recovery mode. See [changelog #3](../changelog.md#3-13f-xml-parser-tripped-on-undeclared-xsischemalocation).
 
 ## Dev mode behavior
 

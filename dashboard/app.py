@@ -709,7 +709,7 @@ with tabs[2]:
                     except Exception:
                         return ""
 
-                styled_stress = stress_df.style.applymap(_color_pnl, subset=["Long P&L", "Short P&L", "Total P&L"])
+                styled_stress = stress_df.style.map(_color_pnl, subset=["Long P&L", "Short P&L", "Total P&L"])
                 st.dataframe(styled_stress, use_container_width=True, hide_index=True)
     except Exception as e:
         st.info(f"Stress tests unavailable: {e}")
@@ -839,7 +839,7 @@ with tabs[3]:
                     return ""
                 return "background-color: rgba(16,185,129,0.3)" if val > 0 else "background-color: rgba(244,63,94,0.3)"
 
-            styled_monthly = monthly_df[present].style.applymap(_color_return).format("{:.2%}", na_rep="-")
+            styled_monthly = monthly_df[present].style.map(_color_return).format("{:.2%}", na_rep="-")
             st.dataframe(styled_monthly, use_container_width=True)
     except Exception as e:
         st.info(f"Monthly returns unavailable: {e}")
@@ -910,7 +910,7 @@ with tabs[3]:
                     return ""
                 return "color: #10b981" if val > 0 else "color: #f43f5e"
 
-            styled_sector = sector_df.style.applymap(_color_alpha, subset=["alpha"]).format({
+            styled_sector = sector_df.style.map(_color_alpha, subset=["alpha"]).format({
                 "portfolio_return": "{:.2%}",
                 "etf_return": "{:.2%}",
                 "alpha": "{:.2%}",
@@ -1011,7 +1011,7 @@ with tabs[4]:
 
             styled_pos = pos_view.style
             if "unrealized_pnl" in pos_view.columns:
-                styled_pos = styled_pos.applymap(_color_pnl_cell, subset=["unrealized_pnl"])
+                styled_pos = styled_pos.map(_color_pnl_cell, subset=["unrealized_pnl"])
 
             st.dataframe(styled_pos, use_container_width=True, hide_index=True)
     except Exception as e:

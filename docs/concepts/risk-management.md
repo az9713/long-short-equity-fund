@@ -183,7 +183,7 @@ The dashboard is the operator's source of truth before promoting `PENDING` trade
 
 **Circuit breakers always show 0 daily P&L.** The breakers compare today's `portfolio_value` to the previous one in `risk_state.json`. On a fresh database with no history, both are equal. Run `python run_risk_check.py` daily so the state file accumulates.
 
-**Stress test results show "no positions."** You haven't executed any trades yet (Layer 6) so `portfolio_positions` is empty. Run the stress test after at least one execution, or pass `weights` directly via the Python API for a what-if.
+**Stress test results show "no positions."** Pre-execution, `portfolio_positions` is empty. As of [changelog #10](../changelog.md#10-run_risk_checkpy---stress-printed-no-results-empty-portfolio-pre-execution), `run_risk_check.py --stress` falls back to a hypothetical book built from the latest scored signals at the per-position cap — six scenarios print whenever `output/scored_universe_latest.csv` has LONG/SHORT rows. If you still see "nothing to stress", run `python run_scoring.py` first.
 
 **Factor risk is 100%.** With very few positions (1–2 names), there's no specific-risk diversification possible. Expand the book or accept the concentration.
 

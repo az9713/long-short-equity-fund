@@ -36,5 +36,6 @@ A seven-layer long-short equity research and paper-trading system. Quantitative 
 | &nbsp;&nbsp;&nbsp;&nbsp;[System design](architecture/system-design.md) | Layered architecture, data flows, dependencies |
 | &nbsp;&nbsp;&nbsp;&nbsp;[ADRs](architecture/adr/) | Decision records |
 | [Troubleshooting](troubleshooting/common-issues.md) | Top failures and fixes |
+| [Changelog](changelog.md) | Bug fixes from the first end-to-end smoke test |
 
 > **New here?** Read [what-is-this](overview/what-is-this.md), then follow the [quickstart](getting-started/quickstart.md).

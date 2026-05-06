@@ -107,7 +107,7 @@ Or relax constraints (raise `gross_limit`, `max_beta`, etc.).
 
 ## Trade list is empty after `--whatif`
 
-**Cause:** No candidates with `signal in (LONG, SHORT)` in `output/scored_universe_latest.csv`. All signals are HOLD.
+**Cause:** No candidates with `signal in (LONG, SHORT)` in `output/scored_universe_latest.csv`. All signals are NEUTRAL.
 
 **Fix:** Inspect the CSV:
 
@@ -116,12 +116,76 @@ sqlite3 -separator ',' :memory: \
   "select count(*), signal from read_csv('output/scored_universe_latest.csv') group by signal;"
 ```
 
-(Or just open the CSV.) If everything is HOLD, the composite scores are too clustered around 50. Causes:
+(Or just open the CSV.) If everything is NEUTRAL, the composite scores are too clustered around 50. Causes:
 
-- Dev mode with sparse sectors → many factors fall back to score 50.
-- Universe is too small for sector-relative ranking to differentiate.
+- **Dev mode with singleton sectors.** `MIN_GROUP_SIZE = 3` in `factors/base.py` makes any sector with <3 tickers fall back to score 50. With one ticker per sector, every factor scores 50 and the composite collapses to 50. The default `dev_tickers` is calibrated to give ≥3 tickers in IT, Health Care, and Financials — keep that property if you edit it. See [changelog #4](../changelog.md#4-dev_tickers-had-one-ticker-per-most-sectors--every-score-collapsed-to-50).
+- **Universe smaller than 5 tickers.** Signal assignment is skipped entirely below 5 tickers — everything stays NEUTRAL.
 
-Switch to full universe or relax thresholds in `factors/composite.py: _assign_signal`.
+Switch to full universe (`dev_mode: false`) or rebuild `dev_tickers` with viable cohorts.
+
+---
+
+## `submit_order failed: fractional orders must be DAY orders`
+
+**Cause:** `execution.time_in_force = "gtc"` (the default) — but Alpaca rejects GTC for fractional shares. JARVIS routinely sizes positions in fractional shares, so this rejected every paper order. Resolved as of [changelog #12](../changelog.md#12-alpaca-rejected-every-paper-order-fractional-orders-must-be-day-orders) — TIF auto-overrides to DAY when shares are fractional.
+
+**Fix:** No action needed if you're on a current commit. If you see this on an older commit, either:
+
+- Pull the fix in `execution/executor.py`, or
+- Set `execution.time_in_force: "day"` in `config.yaml` (works but DAY orders cancel at market close).
+
+---
+
+## Layer 3 LLM calls return 404
+
+**Cause:** The configured `ai.model` was retired by OpenRouter. Free models rotate.
+
+**Fix:** Query the live model list and pick a current free model:
+
+```bash
+curl -s "https://openrouter.ai/api/v1/models" | python -c "
+import json, sys
+for m in json.load(sys.stdin)['data']:
+    if ':free' in m['id']: print(m['id'])
+"
+```
+
+Pick one that responds without 429s (small open-weight models tend to be less congested), and update `config.yaml`:
+
+```yaml
+ai:
+  model: "openai/gpt-oss-20b:free"   # or another current free slug
+```
+
+The architecture is provider-agnostic — see [ADR 001](../architecture/adr/001-openrouter-over-anthropic-api.md).
+
+---
+
+## `Insider transactions: 0` after data refresh, even with SEC email set
+
+**Cause:** Two separate Form 4 bugs surfaced together: a `TypeError` in the SEC fetcher and a URL-construction mismatch where `primary_doc` pointed at the stylesheet HTML render rather than the raw XML. Both fixed — see [changelog #1, #2](../changelog.md#1-sec-_sec_get-clobbered-caller-headers-typeerror).
+
+**Fix:** Pull current `data/sec_data.py`. Verify with:
+
+```bash
+python -c "
+import sqlite3
+c = sqlite3.connect('data/fund.db')
+print(c.execute('SELECT COUNT(*) FROM insider_transactions').fetchone()[0])
+"
+```
+
+Should be in the hundreds for a 10-ticker dev refresh, thousands for full S&P 500.
+
+---
+
+## Stress test prints "No results (empty portfolio)" pre-execution
+
+**Cause:** `--stress` used to require live positions in `portfolio_positions`. Pre-execution, that table is empty.
+
+**Fix:** As of [changelog #10](../changelog.md#10-run_risk_checkpy---stress-printed-no-results-empty-portfolio-pre-execution), `--stress` falls back to a hypothetical book built from the latest scored signals at the per-position cap. As long as `output/scored_universe_latest.csv` has LONG or SHORT rows, the six scenarios print.
+
+If you still see "no positions and no scored signals", run `python run_scoring.py` first — that produces the CSV the fallback reads.
 
 ---
 

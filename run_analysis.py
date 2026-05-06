@@ -93,7 +93,10 @@ def main():
         cfg = get_config()
         model = cfg.get("ai", {}).get("model", "unknown")
         print(f"\n  Model: {model}")
-        print("  Free tier (Gemini 2.0 Flash exp): estimated cost ~$0.00 for ~160 calls")
+        is_free = ":free" in (model or "")
+        tier_label = "Free tier" if is_free else "Paid tier"
+        print(f"  {tier_label}: estimated cost ~$0.00 for ~160 calls" if is_free
+              else f"  {tier_label}: cost depends on model pricing for ~160 calls")
         print("  Rate limit: 15 RPM. 40 tickers x 4 analyzers = 160 calls @ 13/min = ~12 min")
         print("  Cache hits reduce actual calls further.")
         print()

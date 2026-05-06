@@ -54,7 +54,7 @@ Plus one standalone utility: `run_backtest.py` for walk-forward simulation again
 The intended nightly cycle, in order:
 
 1. **Refresh data.** `python run_data.py` pulls today's prices, fundamentals, and any new filings. Run nightly after market close.
-2. **Score the universe.** `python run_scoring.py` recomputes all eight factors, ranks within each GICS sector, and labels each ticker `LONG`, `SHORT`, or `HOLD`. Output is a CSV.
+2. **Score the universe.** `python run_scoring.py` recomputes all eight factors, ranks within each GICS sector, and labels each ticker `LONG`, `SHORT`, or `NEUTRAL`. Output is a CSV.
 3. **Run AI analysis** *(optional)*. `python run_analysis.py` uses OpenRouter to generate qualitative analyses for the top 20 longs and top 20 shorts, then computes a combined score that blends quant and AI views.
 4. **Construct the portfolio.** `python run_portfolio.py --whatif` previews the rebalance. `--rebalance` queues the trades as `PENDING` for approval.
 5. **Risk-check.** `python run_risk_check.py` confirms no circuit breakers are tripped and all factor exposures are within limits. Approve trades by promoting them to `APPROVED` in the database.

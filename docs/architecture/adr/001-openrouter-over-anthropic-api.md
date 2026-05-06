@@ -12,7 +12,9 @@ The user is running this as a personal research project. Recurring API charges a
 
 ## Decision
 
-Use OpenRouter as the LLM gateway. Default model: `google/gemini-2.0-flash-exp:free`. Real cost: $0.
+Use OpenRouter as the LLM gateway. Default model: `openai/gpt-oss-20b:free`. Real cost: $0.
+
+**Update (post-smoke-test):** the original default `google/gemini-2.0-flash-exp:free` was retired by OpenRouter and started returning 404. The current default is OpenAI's open-weight `gpt-oss-20b` on the free tier — verified live, low rate-limit pressure during testing. Google Gemma family (`google/gemma-4-31b-it:free`, `google/gemma-4-26b-a4b-it:free`) are alternative free Google-family options but were returning 429s during testing. The architecture is provider-agnostic; swapping models is one config line. See [changelog](../../changelog.md) entry #6.
 
 ## Alternatives considered
 
@@ -26,7 +28,7 @@ Use OpenRouter as the LLM gateway. Default model: `google/gemini-2.0-flash-exp:f
 
 ### Option C: OpenRouter free tier (chosen)
 - Pros: $0 real cost. OpenAI-SDK-compatible — drop-in via `base_url`. Lets us swap to paid models later by changing one config line.
-- Cons: 15 RPM rate limit (manageable with a 4.5s module-level sleep). Free model (Gemini 2.0 Flash exp) is weaker than Sonnet/GPT-4 on reasoning. No prompt caching support on the free tier.
+- Cons: 15 RPM rate limit (manageable with a 4.5s module-level sleep). Free models are weaker than Sonnet/GPT-4 on reasoning. No prompt caching support on the free tier. Free models also rotate — what's live today may 404 in six months (see Decision update).
 
 ### Option D: Run a local model (Ollama)
 - Pros: Truly $0 with no rate limit. Private.
@@ -48,8 +50,9 @@ No code changes required.
 
 ## Trade-offs
 
-- **Quality reduction.** Gemini 2.0 Flash misses nuance that Sonnet would catch. Acceptable because LLM output is supplementary (30% weight) to quant composite (70%).
-- **No prompt caching.** Gemini free tier doesn't support the prompt-cache mechanism that would otherwise reduce cost on cached system prompts. Irrelevant since the cost is already $0.
+- **Quality reduction.** A 20–30B-parameter free model misses nuance that Sonnet would catch. Acceptable because LLM output is supplementary (30% weight) to quant composite (70%).
+- **No prompt caching.** Free tier doesn't support the prompt-cache mechanism that would otherwise reduce cost on cached system prompts. Irrelevant since the cost is already $0.
+- **Model churn.** Free models rotate. Expect to update `ai.model` once or twice a year as defaults are deprecated; query `https://openrouter.ai/api/v1/models` for current live models.
 - **Rate limit.** 15 RPM means a full nightly run of 160 calls takes ~12 minutes. Acceptable for an end-of-day batch.
 
 ## Consequences

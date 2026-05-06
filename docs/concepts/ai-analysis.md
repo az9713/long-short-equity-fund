@@ -27,13 +27,13 @@ Every analyzer goes through `analysis/ai_client.py: chat_completion()`. That fun
 
 1. Sleeps if the last call was less than 4.5 seconds ago (stay under 15 RPM rate limit).
 2. Builds an OpenAI SDK client pointing at OpenRouter (`base_url: https://openrouter.ai/api/v1`).
-3. Sends the prompt with the configured model (default `google/gemini-2.0-flash-exp:free`).
+3. Sends the prompt with the configured model (default `openai/gpt-oss-20b:free`).
 4. On `RateLimitError`, `APIConnectionError`, or 5xx response, retries with exponential backoff (tenacity).
 5. Returns the response text.
 6. Each analyzer then runs `extract_json()` to pull a JSON object out of the response (handles raw JSON, fenced ```json blocks, and brace-extraction fallback).
 7. Token counts are recorded in the cost tracker.
 
-Because the configured Gemini model is on OpenRouter's free tier, real cost is $0. The cost tracker still runs so you can see token volume.
+Because the configured model is on OpenRouter's free tier, real cost is $0. The cost tracker still runs so you can see token volume. Free models on OpenRouter rotate over time — if the default 404s, see [ADR-001](../architecture/adr/001-openrouter-over-anthropic-api.md) and [changelog #6](../changelog.md#6-default-openrouter-model-was-deprecated-404).
 
 ## The cache
 
@@ -62,7 +62,7 @@ If any analyzer returned `None` (no data, or the LLM call failed), the combined 
 |---------|-------|--------|
 | `ai.cost_ceiling_usd` (config) | 25.0 | Soft ceiling — cost tracker logs a warning when exceeded; does not abort the run |
 | Module rate limit | 4.5s between calls | ~13 calls/min, well under the free tier's 15 RPM |
-| Free model | `google/gemini-2.0-flash-exp:free` | Real cost: $0 |
+| Free model | `openai/gpt-oss-20b:free` | Real cost: $0 |
 
 A full run on the top 20 longs + top 20 shorts × 4 analyzers = 160 calls. At 13/min, this takes ~12 minutes the first time. With cache hits, subsequent runs are seconds.
 

@@ -86,11 +86,14 @@ def generate_rebalance(
 
     trades_df = pd.DataFrame(raw_trades)
 
-    # Apply turnover budget: sort by abs(delta_weight) descending, trim from smallest up
+    # Apply turnover budget: sort by abs(delta_weight) descending, trim from smallest up.
+    # Skip on the initial build from an empty book — turnover budgeting is meant to
+    # limit churn between existing books, not to throttle first-time portfolio construction.
     trades_df = trades_df.sort_values("delta_weight", key=abs, ascending=False)
+    is_initial_build = not current_weights
 
     total_turnover = trades_df["trade_usd"].sum() / portfolio_value
-    if total_turnover > turnover_budget:
+    if not is_initial_build and total_turnover > turnover_budget:
         # Keep the largest trades up to the budget
         trades_df["cum_turnover"] = trades_df["trade_usd"].cumsum() / portfolio_value
         trades_df = trades_df[trades_df["cum_turnover"] <= turnover_budget].copy()
@@ -99,6 +102,8 @@ def generate_rebalance(
             f"Turnover budget ({turnover_budget:.0%}) applied: "
             f"trimmed to {len(trades_df)} trades"
         )
+    elif is_initial_build:
+        log.info(f"Initial build from empty book ({total_turnover:.1%}) — turnover budget not applied")
 
     if whatif:
         print(f"\n{'='*65}")

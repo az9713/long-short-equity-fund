@@ -177,10 +177,15 @@ def run_scoring(tickers: list[str] = None) -> pd.DataFrame:
 
     result["composite"] = composite.round(2)
 
-    # Generate signals: top quintile LONG, bottom quintile SHORT
+    # Generate signals: top quintile LONG, bottom quintile SHORT.
+    # Use rank-based quintiles so signals scale with universe size — absolute
+    # 80/20 thresholds never fire on small universes (e.g. dev mode).
     result["signal"] = "NEUTRAL"
-    result.loc[result["composite"] >= 80, "signal"] = "LONG"
-    result.loc[result["composite"] <= 20, "signal"] = "SHORT"
+    n = len(result)
+    if n >= 5:
+        comp_pct = result["composite"].rank(pct=True) * 100
+        result.loc[comp_pct >= 80, "signal"] = "LONG"
+        result.loc[comp_pct <= 20, "signal"] = "SHORT"
 
     log.info(
         f"Signals: {(result['signal']=='LONG').sum()} LONG, "

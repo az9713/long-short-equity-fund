@@ -44,7 +44,7 @@ python run_dashboard.py
 # → http://localhost:8502
 ```
 
-The `dev_mode: true` setting in `config.yaml` restricts the system to a 10-ticker universe (`AAPL, MSFT, GOOGL, AMZN, NVDA, JPM, JNJ, UNH, XOM, V`) for fast end-to-end validation. Flip to `false` for the full S&P 500.
+The `dev_mode: true` setting in `config.yaml` restricts the system to a 10-ticker universe (`AAPL, MSFT, NVDA, INTC, JNJ, UNH, LLY, JPM, GS, BAC`) for fast end-to-end validation. Flip to `false` for the full S&P 500.
 
 Full nightly cycle: see `docs/guides/run-the-full-pipeline.md`.
 
@@ -69,7 +69,7 @@ A complete docs tree lives in `docs/` — 28 files across overview, getting-star
 | Market data | yfinance (free) |
 | Filings + insider data | SEC EDGAR (free; `User-Agent` email required) |
 | LLM gateway | OpenRouter via `openai` SDK |
-| Default model | `google/gemini-2.0-flash-exp:free` |
+| Default model | `openai/gpt-oss-20b:free` |
 | Broker | Alpaca paper trading via `alpaca-py` |
 | Optimization | `scipy.optimize.minimize` (SLSQP) |
 | Database | SQLite (single file: `data/fund.db`) |

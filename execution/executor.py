@@ -128,6 +128,10 @@ def _place_alpaca_order(ticker: str, side: str, shares: float, limit_price: floa
         alpaca_side = _alpaca_side(side)
         tif_str = cfg.get("time_in_force", "gtc").upper()
         tif = TimeInForce.GTC if tif_str == "GTC" else TimeInForce.DAY
+        # Alpaca rejects GTC for fractional shares — force DAY when fractional.
+        if tif == TimeInForce.GTC and float(shares) != int(float(shares)):
+            log.info(f"Fractional shares ({shares}) — overriding time_in_force GTC -> DAY for {ticker}")
+            tif = TimeInForce.DAY
 
         req = LimitOrderRequest(
             symbol=ticker,

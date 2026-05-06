@@ -20,7 +20,7 @@ FORM4_CONTENT_CAP = 80_000
 @sleep_and_retry
 @limits(calls=8, period=1)
 def _sec_get(url: str, **kwargs) -> requests.Response:
-    headers = {**sec_headers(), "Accept": "application/json"}
+    headers = {**sec_headers(), "Accept": "application/json", **kwargs.pop("headers", {})}
     r = requests.get(url, headers=headers, timeout=20, **kwargs)
     r.raise_for_status()
     return r
@@ -401,37 +401,35 @@ def update_sec_data(tickers: list[str], no_filings: bool = False, forms: list[st
 
             xml_text = ""
             try:
-                # Fetch the index to find the XML document
                 cik_int = str(int(cik))
-                index_url = (
-                    f"https://www.sec.gov/Archives/edgar/data/{cik_int}/{acc}/"
-                    + filing["accession_raw"].replace("-", "") + "-index.json"
-                )
-                # Use accession raw with dashes for index URL
-                acc_dashed = filing["accession_raw"]
-                index_url = (
-                    f"https://www.sec.gov/Archives/edgar/data/{cik_int}/{acc_dashed}-index.htm"
-                )
-
-                # Directly try the primary doc
                 primary = filing.get("primary_doc", "")
-                if primary and primary.endswith(".xml"):
-                    xml_url = f"https://www.sec.gov/Archives/edgar/data/{cik_int}/{acc}/{primary}"
-                    r = _sec_get_retry(
-                        xml_url,
-                        headers={**sec_headers(), "Accept": "application/xml,text/xml,*/*"},
-                    )
-                    xml_text = r.text
-                else:
-                    # Try finding XML via filing index
-                    idx_url = f"{SEC_BASE}/submissions/CIK{cik}.json"
-                    # Fall back to constructing standard Form 4 doc name
-                    xml_url = f"https://www.sec.gov/Archives/edgar/data/{cik_int}/{acc}/{primary}"
-                    r = _sec_get_retry(
-                        xml_url,
-                        headers={**sec_headers(), "Accept": "*/*"},
-                    )
-                    xml_text = r.text
+                # SEC sometimes returns "xslF345X06/form4.xml" — that's the stylesheet
+                # render (HTML), not raw XML. Strip any directory prefix so we hit the
+                # raw XML at the filing root.
+                if primary.endswith(".xml") and "/" in primary:
+                    primary = primary.rsplit("/", 1)[1]
+                xml_doc = primary if primary.endswith(".xml") else None
+
+                if xml_doc is None:
+                    index_url = f"https://www.sec.gov/Archives/edgar/data/{cik_int}/{acc}/index.json"
+                    idx_r = _sec_get_retry(index_url)
+                    items = idx_r.json().get("directory", {}).get("item", [])
+                    candidates = [
+                        it["name"] for it in items
+                        if it.get("name", "").endswith(".xml")
+                        and not it["name"].lower().startswith("filingsummary")
+                    ]
+                    if not candidates:
+                        log.warning(f"No Form 4 XML found in index for {ticker} {acc}")
+                        continue
+                    xml_doc = candidates[0]
+
+                xml_url = f"https://www.sec.gov/Archives/edgar/data/{cik_int}/{acc}/{xml_doc}"
+                r = _sec_get_retry(
+                    xml_url,
+                    headers={"Accept": "application/xml,text/xml,*/*"},
+                )
+                xml_text = r.text
 
             except Exception as e:
                 log.warning(f"Failed to fetch Form 4 XML for {ticker} {acc}: {e}")

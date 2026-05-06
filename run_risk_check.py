@@ -12,7 +12,7 @@ Usage:
 import sys
 import argparse
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
 
 ROOT = Path(__file__).parent
 sys.path.insert(0, str(ROOT))
@@ -63,7 +63,7 @@ def _print_dashboard(portfolio_value: float = 100_000.0):
 
     cfg = get_config().get("risk", {})
 
-    print(f"\nRISK DASHBOARD - {datetime.utcnow().strftime('%Y-%m-%d')}")
+    print(f"\nRISK DASHBOARD - {datetime.now(timezone.utc).strftime('%Y-%m-%d')}")
     print("=" * 44)
 
     # Update prices first
@@ -202,17 +202,41 @@ def _print_stress(portfolio_value: float = 100_000.0):
 
     weights = _build_weights(positions, portfolio_value)
 
-    print(f"\nSTRESS TEST RESULTS - {datetime.utcnow().strftime('%Y-%m-%d')}")
+    print(f"\nSTRESS TEST RESULTS - {datetime.now(timezone.utc).strftime('%Y-%m-%d')}")
     print("=" * 56)
 
     if not weights:
-        print("  No positions — using example weights for illustration.")
-        # Demo with empty weights just shows the structure
-        weights = {}
+        # Fall back to scored signals at the per-position cap so stress can run
+        # pre-execution. This approximates what the optimizer would build.
+        try:
+            import pandas as pd
+            from utils import ROOT, get_config
+            scored_path = ROOT / "output" / "scored_universe_latest.csv"
+            if scored_path.exists():
+                scored = pd.read_csv(scored_path)
+                cap = get_config().get("portfolio", {}).get("max_position_pct", 0.05)
+                hypo = {}
+                for _, r in scored.iterrows():
+                    if r.get("signal") == "LONG":
+                        hypo[r["ticker"]] = cap
+                    elif r.get("signal") == "SHORT":
+                        hypo[r["ticker"]] = -cap
+                if hypo:
+                    print(f"  No live positions — stressing hypothetical book "
+                          f"({sum(1 for v in hypo.values() if v>0)}L / "
+                          f"{sum(1 for v in hypo.values() if v<0)}S at {cap:.0%} each).")
+                    weights = hypo
+        except Exception as e:
+            log = __import__('utils').get_logger('run_risk_check')
+            log.warning(f"Hypothetical-book fallback failed: {e}")
+
+    if not weights:
+        print("  No positions and no scored signals — nothing to stress.")
+        return
 
     results = run_stress_tests(weights)
     if not results:
-        print("  No results (empty portfolio)")
+        print("  No results (stress runner returned empty)")
         return
 
     for r in results:
