@@ -18,7 +18,7 @@ A package of nine modules under `data/` plus the `run_data.py` entry point. Each
 | `data/short_interest.py` | Short interest reports from FINRA | `short_interest` |
 | `data/estimates.py` | Analyst estimates and revisions (yfinance) | `analyst_estimates` |
 | `data/earnings_calendar.py` | Upcoming earnings dates per ticker | `earnings_calendar` |
-| `data/transcripts.py` | Earnings call transcripts (placeholder — FMP if key set) | `earnings_transcripts` |
+| `data/transcripts.py` | Earnings call transcripts (placeholder — FMP if key set) | `transcripts` |
 | `data/providers.py` | Shared HTTP client, retries, throttling | — |
 
 ## How a refresh works

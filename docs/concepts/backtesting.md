@@ -72,28 +72,16 @@ python run_backtest.py [options]
 
 ## Output
 
-Two files per run:
+Four files per run, all under `output/backtest/` (or wherever `--output-dir` points):
 
-- `output/backtest_<start>_<end>_<mode>.json` — full results, including the equity curve, monthly returns, summary stats.
-- `output/backtest_latest.json` — copy of the most recent run, used by the dashboard's Backtest tab.
+| File | Format | Contents |
+|------|--------|----------|
+| `equity_curve.csv` | CSV | One row per trading day with portfolio value |
+| `monthly_returns.csv` | CSV | Calendar-month return grid |
+| `rebalance_log.csv` | CSV | Per-rebalance row: longs, shorts, period return |
+| `summary.txt` | text | Human-readable performance summary (annualized return, Sharpe, max DD, factor analysis) |
 
-JSON schema:
-
-```json
-{
-  "params": {"start": "...", "end": "...", "mode": "...", ...},
-  "equity_curve": [{"date": "...", "value": 1.0}, ...],
-  "monthly_returns": [...],
-  "summary": {
-    "total_return": 0.142,
-    "annualized_return": 0.034,
-    "annualized_vol": 0.087,
-    "sharpe": 0.39,
-    "max_drawdown": -0.061,
-    "n_months": 36
-  }
-}
-```
+The dashboard's Backtest tab does not read these files directly — it shells out to `run_backtest.py` on demand (`python run_backtest.py …`) and renders the inline output.
 
 ## Performance
 
@@ -107,7 +95,7 @@ A 4-year backtest on the dev (10-ticker) universe runs in 5–10 seconds. On the
 
 **Equity curve flat.** Signal isn't differentiating positions enough. Check that `--num-longs` and `--num-shorts` aren't both > universe-size / 2 (in dev mode with 10 tickers and 5 each, the entire universe is in the portfolio at all times).
 
-**Results don't match dashboard.** The Backtest tab reads `output/backtest_latest.json`. If you ran with `--start 2010` last week and re-ran with `--start 2022` today, the latest file has the new run — the dashboard updates accordingly. Check the `params` block in the JSON.
+**Results don't match expectation.** The Backtest tab in the dashboard re-runs `run_backtest.py` from scratch each time you click — it does not cache results. Each tab interaction hits the date pickers and emits a new CSV/TXT bundle into `output/backtest/`. CLI runs and dashboard runs both write to the same directory; the latest writer wins.
 
 ## What this is not
 

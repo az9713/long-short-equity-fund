@@ -34,7 +34,7 @@ The single-ticker mode prints a detailed breakdown:
   institutional        72.1  ##############
 
   Composite Score:  68.4
-  Signal:           HOLD
+  Signal:           NEUTRAL
 
   Quality Diagnostics:
     Piotroski F:    8
@@ -63,10 +63,10 @@ Output:
 The four analyzers each return a structured JSON dict. To inspect them directly:
 
 ```bash
-sqlite3 data/fund.db "SELECT analyzer, output FROM ai_cache WHERE ticker='AAPL' ORDER BY created_at DESC LIMIT 4;"
+sqlite3 data/fund.db "SELECT analyzer, result FROM analysis_cache WHERE ticker='AAPL' ORDER BY cached_at DESC LIMIT 4;"
 ```
 
-Each row's `output` is the JSON dict from that analyzer.
+Each row's `result` is the JSON dict from that analyzer.
 
 ### 3. View the per-ticker report
 
@@ -95,7 +95,7 @@ In Tab II (Research), filter by ticker. The factor radar and the AI analyses app
 
 ## Verification
 
-After step 1, the ticker should appear as a row in `output/scored_universe_latest.csv` with non-null factor scores. After step 2, four rows for that ticker should exist in the `ai_cache` table.
+After step 1, the ticker should appear as a row in `output/scored_universe_latest.csv` with non-null factor scores. After step 2, four rows for that ticker should exist in the `analysis_cache` table.
 
 ## Common gotchas (this task)
 
@@ -111,8 +111,8 @@ python run_scoring.py --ticker AAPL
 
 **AI analyzer returns "no data."** The underlying source table is empty for that ticker. Check:
 - `filing_analyzer` needs `sec_filings` rows. Re-run `python run_data.py` without `--no-filings`.
-- `earnings_analyzer` needs `earnings_transcripts`. With no FMP key, transcripts are sparse — the analyzer falls back to the earnings calendar metadata, which still works for major large-caps.
-- `insider_analyzer` needs `insider_transactions`. Re-run `python run_data.py` without `--no-13f` is irrelevant — that's institutional data; insiders come from SEC, controlled by `--no-filings`.
+- `earnings_analyzer` needs `transcripts`. With no FMP key, transcripts are sparse — the analyzer falls back to the earnings calendar metadata, which still works for major large-caps.
+- `insider_analyzer` needs `insider_transactions`. Form 4 fetching always runs in `run_data.py` (it isn't gated by `--no-filings`, which only skips 10-K/10-Q/8-K, nor by `--no-13f`, which is institutional). If insider data is missing, see [changelog #1, #2](../changelog.md#1-sec-_sec_get-clobbered-caller-headers-typeerror) — there were two SEC fetcher bugs that produced silent zero rows.
 
 ## See also
 

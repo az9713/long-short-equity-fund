@@ -131,7 +131,7 @@ python run_execution.py [flags]
 
 Exactly one flag is required.
 
-**Side effects:** `--execute` writes to `open_orders`, `order_log`. On fill: `portfolio_positions`, `portfolio_history`, `slippage` data.
+**Side effects:** `--execute` writes to `open_orders`, `order_log` (slippage is a column on `order_log`, not a separate table). On fill: `portfolio_positions`, `portfolio_history`.
 
 **SIGINT handling:** during `--execute`, Ctrl-C cancels all pending orders before exit.
 
@@ -167,17 +167,20 @@ python run_backtest.py [flags]
 
 | Flag | Default | Description |
 |------|---------|-------------|
-| `--start YYYY-MM-DD` | `2021-01-01` | Backtest start date |
-| `--end YYYY-MM-DD` | today | Backtest end date |
-| `--dev` | off | Use dev_tickers (10 names) |
-| `--full-score` | off | Use 8-factor composite (BIASED — see backtesting docs) |
-| `--with-costs` | off | Subtract 10 bps per round-trip rebalance |
+| `--start YYYY-MM-DD` | 3 years ago | Backtest start date |
+| `--end YYYY-MM-DD` | yesterday | Backtest end date |
+| `--method {mvo,conviction}` | `conviction` | Portfolio construction method |
 | `--num-longs N` | 20 | Long cohort size |
 | `--num-shorts N` | 20 | Short cohort size |
+| `--rebalance-days N` | 21 | Rebalance frequency in trading days (21 ≈ monthly) |
+| `--with-costs` | off | Subtract 10 bps per round-trip rebalance |
+| `--dev` | off | Use `dev_tickers` (10 names) |
+| `--output-dir PATH` | `output/backtest/` | Where to write CSV/TXT artifacts |
+| `--full-score` | off | Use 8-factor composite (BIASED — see backtesting docs) |
 
-**Output:** `output/backtest_<start>_<end>_<mode>.json` and `output/backtest_latest.json`.
+**Output:** `output/backtest/equity_curve.csv`, `monthly_returns.csv`, `rebalance_log.csv`, `summary.txt`.
 
-**Exit codes:** 0 success, 1 if `daily_prices` insufficient for date range.
+**Exit codes:** 0 success, 1 if no rebalance periods can complete (insufficient price history).
 
 ## See also
 

@@ -267,7 +267,7 @@ See [Handle a circuit breaker](../guides/handle-a-circuit-breaker.md) for the fu
 
 ---
 
-## "ai_cache hit" but I want fresh analysis
+## "analysis_cache hit" but I want fresh analysis
 
 **Cause:** Layer 3 caches analyzer outputs for `ai.cache_ttl_days` (default 30 days) keyed by `(ticker, analyzer, prompt_hash)`. Re-runs hit the cache.
 

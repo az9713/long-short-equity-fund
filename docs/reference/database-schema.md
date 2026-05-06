@@ -91,9 +91,10 @@ Created by `data/transcripts.py`. Source: FMP if `FMP_API_KEY` set.
 | Column | Type | Description |
 |--------|------|-------------|
 | `ticker` | TEXT | |
-| `date` | TEXT | |
-| `text` | TEXT | Full transcript |
-| Composite key | (ticker, date) | |
+| `fiscal_quarter` | TEXT | E.g. `2025Q1` |
+| `content` | TEXT | Full transcript |
+| `fetched_date` | TEXT | |
+| Composite key | (ticker, fiscal_quarter) | |
 
 ## SEC
 
@@ -273,12 +274,12 @@ Created by `analysis/cache.py`. Memoizes analyzer outputs.
 
 | Column | Type | Description |
 |--------|------|-------------|
-| `ticker` | TEXT | |
 | `analyzer` | TEXT | `filing` / `earnings` / `risk` / `insider` / `sector` |
-| `prompt_hash` | TEXT | SHA-1 of the prompt |
-| `output` | TEXT | JSON string |
-| `created_at` | TEXT | |
-| Composite key | (ticker, analyzer, prompt_hash) | |
+| `ticker` | TEXT | |
+| `artifact_id` | TEXT | Stable hash of the source artifact (e.g. filing accession or transcript hash) |
+| `result` | TEXT | JSON string |
+| `cached_at` | DATE | |
+| Composite key | (analyzer, ticker, artifact_id) | |
 
 ### `ai_cost_log`
 Created by `analysis/cost_tracker.py`. Per-call token usage.
@@ -316,7 +317,7 @@ A few pieces of state live as files outside `fund.db`:
 | `risk/risk_state.json` | JSON | Daily snapshot used by circuit breakers (`portfolio_value`, `peak_value`, `weekly_pnl`, `risk_decomposition`, `mctr`) |
 | `risk/halt.lock` | JSON | Presence blocks all execution. Reason + timestamp inside. |
 | `output/scored_universe_latest.csv` | CSV | Output of Layer 2; consumed by Layers 3, 4, 5 |
-| `output/backtest_latest.json` | JSON | Most recent backtest result; consumed by dashboard |
+| `output/backtest/{equity_curve,monthly_returns,rebalance_log}.csv` + `summary.txt` | CSV / text | Most recent backtest result. Each `run_backtest.py` invocation overwrites this directory. |
 | `output/reports/<TICKER>_<DATE>.md` | Markdown | Per-ticker AI report |
 | `output/letters/<DATE>.md` | Markdown | Weekly investor letter |
 

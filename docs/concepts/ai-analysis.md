@@ -42,7 +42,7 @@ Because the configured model is on OpenRouter's free tier, real cost is $0. The 
 - If the underlying data hasn't changed (filing date, transcript hash) → cache hit, no LLM call.
 - If it has changed → cache miss, LLM call + cache write.
 
-The cache substantially reduces per-run cost for sector synthesis and re-runs. Clear it by deleting the `ai_cache` table or the relevant rows.
+The cache substantially reduces per-run cost for sector synthesis and re-runs. Clear it by deleting the `analysis_cache` table or the relevant rows.
 
 ## Combined score
 
@@ -118,7 +118,7 @@ In that case set the appropriate API key in `.env` (the SDK will look up `OPENRO
 
 **Analyzer returns `None`.** The LLM either rate-limited (look for tenacity retry messages in the log), returned non-JSON, or the underlying data was missing (no recent filing, no transcript). Re-run; if persistent, inspect the cache table directly.
 
-**Combined score is the same as quant composite.** No analyzers produced output for those tickers. Either no key set, or the data layer didn't populate the source tables (`sec_filings`, `earnings_transcripts`).
+**Combined score is the same as quant composite.** No analyzers produced output for those tickers. Either no key set, or the data layer didn't populate the source tables (`sec_filings`, `transcripts`).
 
 **Sector outlook is empty for some sectors.** Sectors with fewer than 2 candidates in the candidate set are skipped — there's nothing to synthesize.
 

@@ -27,14 +27,14 @@ Seven tabs, in order:
 | Tab | Reads from | Shows |
 |-----|------------|-------|
 | I · Portfolio | `portfolio_positions`, `position_approvals` | Current positions, P&L, sector exposure, beta, pending approvals |
-| II · Research | `output/scored_universe_latest.csv`, `analysis/cache` | Factor breakdowns per ticker, AI analyses, sector synthesis |
+| II · Research | `output/scored_universe_latest.csv`, `analysis_cache`, `output/reports/` | Factor breakdowns per ticker, AI analyses, sector synthesis. Includes per-ticker approve/reject controls and an `Execute Approved Trades` button. |
 | III · Risk | `risk/risk_state.json`, `veto_log` | Circuit-breaker status, factor exposures, MCTR, correlation, recent vetoes |
-| IV · Performance | `portfolio_history`, `fills` | Cumulative P&L, drawdown chart, win/loss stats, tear sheet |
-| V · Execution | `orders`, `fills` | Open orders, recent fills, slippage statistics |
+| IV · Performance | `portfolio_history`, `order_log` | Cumulative P&L, drawdown chart, win/loss stats, tear sheet |
+| V · Execution | `open_orders`, `order_log` | Open orders, recent fills, slippage statistics |
 | VI · Letter | `reporting/commentary.py` output | Weekly investor letter (Markdown rendered) |
-| VII · Backtest | `output/backtest_*.json` | Backtest equity curve, summary stats from prior `run_backtest.py` invocations |
+| VII · Backtest | `output/backtest/` (re-runs `run_backtest.py` on submit) | Backtest equity curve, summary stats |
 
-The dashboard is read-only by design. It does not place trades, modify approvals, or run the pipeline. Use the CLI `run_*.py` scripts for those actions.
+The dashboard is mostly read-only, with two write-side controls: per-ticker approve/reject buttons (Tab II) write to `position_approvals`, and the `Execute Approved Trades` button (Tab II) submits Alpaca orders. Everything else is display-only — use the CLI `run_*.py` scripts for the rest of the pipeline.
 
 ## Visual style
 
@@ -113,7 +113,7 @@ Tracked monthly. The fund's `portfolio.turnover_budget` (default 0.30, i.e. 30% 
 
 **Streamlit shows "ScriptRunner: Could not connect."** Port 8502 is already in use. Change `dashboard.port` in config and restart.
 
-**Backtest tab is empty.** No `output/backtest_*.json` files yet. Run `python run_backtest.py --start 2022-01-01 --dev` to produce one.
+**Backtest tab fails to render.** The tab shells out to `run_backtest.py` on form submit. If the run errors, the failure surfaces in the tab. Common cause: requested date range exceeds available `daily_prices` history (data layer only backfills 2 years by default). Pick a start date within the available window or extend backfill.
 
 ## See also
 

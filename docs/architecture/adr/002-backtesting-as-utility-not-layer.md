@@ -13,7 +13,7 @@ Reflection during planning surfaced two issues:
 
 ## Decision
 
-Make `run_backtest.py` a **standalone utility**. It is not invoked by any nightly script. It writes to `output/backtest_*.json` and is consumed only by the Backtest tab in the dashboard.
+Make `run_backtest.py` a **standalone utility**. It is not invoked by any nightly script. It writes to `output/backtest/{equity_curve,monthly_returns,rebalance_log}.csv` plus `summary.txt`. The Backtest tab in the dashboard re-runs it as a subprocess on demand rather than reading cached artifacts.
 
 The backtest is invoked manually:
 
@@ -50,6 +50,6 @@ The user is also better-served by friction here. Re-running a backtest manually 
 
 ## Consequences
 
-- The dashboard's Backtest tab is empty until the user runs `run_backtest.py` at least once. The tab's "no data" placeholder explicitly tells the user how to populate it.
-- Backtest output goes to `output/backtest_*.json`, parallel to but not part of the production data files.
+- The dashboard's Backtest tab has its own form (date pickers, num-longs/num-shorts) and shells out to `run_backtest.py` on submit. Inline output renders below the form.
+- Backtest output goes to `output/backtest/`, parallel to but not part of the production data files.
 - Bias caveats are printed at every invocation and documented in [the backtesting concept page](../../concepts/backtesting.md). Users cannot ignore them.

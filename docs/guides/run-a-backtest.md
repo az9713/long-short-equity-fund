@@ -67,10 +67,11 @@ Output ends with a summary block:
   Sharpe:           0.39
   Max drawdown:    -6.1%
 
-  Output: output/backtest_2021-01-01_2024-12-31_mom.json
+  Output saved to: output/backtest/
+    equity_curve.csv, monthly_returns.csv, rebalance_log.csv, summary.txt
 ```
 
-The JSON contains the equity curve and monthly returns for charting.
+`equity_curve.csv` and `monthly_returns.csv` are the inputs you'd chart. `summary.txt` is the same human-readable block above. Pass `--output-dir <path>` to redirect.
 
 ### View in dashboard
 
@@ -78,7 +79,7 @@ The JSON contains the equity curve and monthly returns for charting.
 python run_dashboard.py
 ```
 
-Tab VII (Backtest) reads `output/backtest_latest.json` (a copy of the most recent run) and renders the equity curve plus summary stats. Re-run a backtest, refresh the tab, and it shows the new run.
+Tab VII (Backtest) does not cache results — it re-runs `run_backtest.py` as a subprocess every time you submit the form, then renders the inline output. Each click overwrites `output/backtest/`.
 
 ## Tuning
 
@@ -98,7 +99,7 @@ Tab VII (Backtest) reads `output/backtest_latest.json` (a copy of the most recen
 
 **`--full-score` runs but throws warnings about missing fundamentals.** yfinance failed to populate quarterly fundamentals for some tickers. Affected tickers default to score 50 (sector median), which softens the signal. Either re-run `python run_data.py` to refresh, or accept the noisier result.
 
-**The dashboard's Backtest tab shows yesterday's run.** It reads `output/backtest_latest.json`. Confirm by inspecting the file's `params` block — if `start_date` matches your last invocation, it's current. If not, re-run.
+**The dashboard's Backtest tab shows stale results.** It doesn't cache — it shells out to `run_backtest.py` on every form submission. If the dashboard render is wrong, the most recent shell-out call is what produced it. Inspect `output/backtest/summary.txt` to see what was actually run.
 
 ## See also
 
