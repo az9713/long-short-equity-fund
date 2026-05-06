@@ -38,7 +38,7 @@ Full-page captures of each Streamlit tab on a 10-ticker dev universe.
 ### I · Portfolio
 KPI strip (universe / longs / shorts / positions / insider events / VIX) and the natural-language **Ask JARVIS** assistant.
 
-![Portfolio tab](output/screenshots/porfolio.jpg)
+![Portfolio tab](output/screenshots/portfolio.jpg)
 
 ### II · Research & Signals
 Color-graded factor heatmap (8 factors × universe), per-ticker drill-downs with Piotroski F-Score and Altman Z badges, and the inline approve/reject workflow.
