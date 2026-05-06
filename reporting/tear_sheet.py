@@ -20,7 +20,9 @@ def _get_nav_series(days: int) -> pd.DataFrame:
     df["date"] = pd.to_datetime(df["date"])
     df = df.set_index("date").sort_index()
 
-    cutoff = pd.Timestamp.utcnow() - pd.Timedelta(days=days)
+    # pd.Timestamp.utcnow() is tz-aware in pandas >=2.0 but the index from
+    # pd.to_datetime is tz-naive — comparing the two raises. Strip tz to match.
+    cutoff = pd.Timestamp.utcnow().tz_localize(None) - pd.Timedelta(days=days)
     df = df[df.index >= cutoff]
     return df
 

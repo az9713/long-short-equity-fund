@@ -27,7 +27,10 @@ data/*.db-wal
 data/*.db-shm
 
 # Generated outputs
-output/
+# Ignore contents of output/ but re-include screenshots used by README.
+output/*
+!output/screenshots/
+!output/screenshots/**
 
 # Risk state (per-machine)
 risk/halt.lock

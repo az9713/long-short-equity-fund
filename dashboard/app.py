@@ -457,8 +457,11 @@ with tabs[1]:
                     for rdir in report_dirs[:3]:
                         report_file = rdir / f"{ticker}.md"
                         if report_file.exists():
-                            with st.expander("Claude Analysis"):
-                                st.markdown(report_file.read_text(encoding="utf-8"))
+                            # Streamlit forbids expanders inside expanders;
+                            # use a divider + heading instead so this nests cleanly.
+                            st.divider()
+                            st.markdown("**Claude Analysis**")
+                            st.markdown(report_file.read_text(encoding="utf-8"))
                             break
 
         with long_col:

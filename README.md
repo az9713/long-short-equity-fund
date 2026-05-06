@@ -31,6 +31,45 @@ A few intentional changes from the source:
 - **Streamlit dashboard** with seven tabs: Portfolio, Research, Risk, Performance, Execution, Letter, Backtest. Dark theme, custom CSS, served on `localhost:8502`.
 - **Graceful degradation.** Optional API keys (FMP, Polygon, FRED) fall back to free sources. No `OPENROUTER_API_KEY`? Combined score = quant composite, pipeline still runs. No Alpaca keys? Broker enters `SIMULATED` mode with synthetic fills, downstream layers behave identically.
 
+## Dashboard
+
+Full-page captures of each Streamlit tab on a 10-ticker dev universe.
+
+### I · Portfolio
+KPI strip (universe / longs / shorts / positions / insider events / VIX) and the natural-language **Ask JARVIS** assistant.
+
+![Portfolio tab](output/screenshots/porfolio.jpg)
+
+### II · Research & Signals
+Color-graded factor heatmap (8 factors × universe), per-ticker drill-downs with Piotroski F-Score and Altman Z badges, and the inline approve/reject workflow.
+
+![Research and Signals tab](output/screenshots/research_and_signal.jpg)
+
+### III · Risk Dashboard
+Circuit breakers, MCTR table flagging disproportionate risk contributors, factor-exposure bar chart (Long vs Short), and the six-scenario stress matrix.
+
+![Risk Dashboard tab](output/screenshots/risk_dashboard.jpg)
+
+### IV · Performance
+Equity curve (Portfolio vs SPY), seven-card metrics strip (Sharpe / Max DD / Calmar / Beta / Alpha / Corr SPY / Win Rate), monthly-returns grid, and drawdown chart.
+
+![Performance tab](output/screenshots/performance.jpg)
+
+### V · Execution Monitor
+Live open-orders book with Alpaca order IDs, recent fills with slippage, position monitor, short availability, and 30-day slippage summary.
+
+![Execution Monitor tab](output/screenshots/execution_monitor.jpg)
+
+### VI · Letter
+AI-written weekly commentary — VIX regime context, portfolio review, MCTR analysis, factor positioning, and forward-looking outlook. Generated through OpenRouter on demand.
+
+![Letter tab](output/screenshots/letter.jpg)
+
+### VII · Backtest
+Walk-forward backtest UI with bias-caveat banner, date pickers, num-longs/num-shorts inputs, and run controls.
+
+![Backtest tab](output/screenshots/backtest.jpg)
+
 ## Quickstart
 
 ```bash
